@@ -19,7 +19,7 @@ public class EntityValidator<T> implements Validator {
     private final Employee employee;
 
     @Override
-    public void validate(T object) throws DepartmentNotFoundException{
+    public boolean valide(T object) throws DepartmentNotFoundException{
         if (employee == null) {
             throw new DepartmentNotFoundException(id);
         } else if (employee.getEmail())

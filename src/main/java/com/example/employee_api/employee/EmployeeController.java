@@ -17,7 +17,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/employee")
 @RequiredArgsConstructor
-public class EmployeeController {
+public class
+EmployeeController {
     private final EmployeeService employeeService;
 
     @PostMapping("/create")
