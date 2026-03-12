@@ -1,79 +1,75 @@
 package com.example.employee_api.analytics.service;
 
-import com.example.employee_api.common.EntityValidator;
-import com.example.employee_api.common.exceptions.DepartmentNotFoundException;
 import com.example.employee_api.department.DepartmentRepository;
-import com.example.employee_api.department.model.Department;
 import com.example.employee_api.employee.EmployeeRepository;
 import com.example.employee_api.employee.dto.EmployeeResponseDTO;
 import com.example.employee_api.employee.mapper.EmployeeMapper;
 import com.example.employee_api.employee.model.Employee;
-import com.example.employee_api.salary.SalaryRepository;
 import com.example.employee_api.employee.model.SalaryDistribution;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
+import com.example.employee_api.salary.SalaryRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class DepartmentAnalyticsService {
-    private final SalaryRepository salaryRepository;
-    private final DepartmentRepository departmentRepository;
-    private final EmployeeRepository employeeRepository;
-    private final EntityValidator entityValidator;
-    private final EmployeeMapper employeeMapper;
+  private final SalaryRepository salaryRepository;
+  private final DepartmentRepository departmentRepository;
+  private final EmployeeRepository employeeRepository;
+  private final EmployeeMapper employeeMapper;
 
-    public BigDecimal findAvgSalaryForDepartment(int id) {
+  @Autowired
+  public DepartmentAnalyticsService(
+      SalaryRepository salaryRepository,
+      DepartmentRepository departmentRepository,
+      EmployeeRepository employeeRepository,
+      EmployeeMapper employeeMapper) {
+    this.salaryRepository = salaryRepository;
+    this.departmentRepository = departmentRepository;
+    this.employeeRepository = employeeRepository;
+    this.employeeMapper = employeeMapper;
+  }
 
-        validateCommon(departmentRepository.checkIfDepartmentExists(id),id);
-        return Optional.
-                of(salaryRepository.getAvgSalaryByDepartmentId(id).
-                        setScale(2, RoundingMode.HALF_UP)).
-                orElse(BigDecimal.ZERO);
-    }
+  public BigDecimal findAvgSalaryForDepartment(int departmentId) {
+    departmentRepository.checkIfDepartmentExists(departmentId);
+    return Optional.of(
+            salaryRepository
+                .getAvgSalaryByDepartmentId(departmentId)
+                .setScale(2, RoundingMode.HALF_UP))
+        .orElse(BigDecimal.ZERO);
+  }
 
-    public BigDecimal findSalaryBudgedForDepartment(int id) {
-//        entityValidator.validateExists(departmentRepository.checkIfDepartmentExists(id),
-//                () -> new DepartmentNotFoundException(id));
-        return Optional.of(salaryRepository.getTotalSalaryBudgetByDepartmentId(id).
-                        setScale(2, RoundingMode.HALF_UP)).
-                orElse(BigDecimal.ZERO);
-    }
+  public BigDecimal findSalaryBudgedForDepartment(int departmentId) {
+    departmentRepository.checkIfDepartmentExists(departmentId);
+    return Optional.of(
+            salaryRepository
+                .getTotalSalaryBudgetByDepartmentId(departmentId)
+                .setScale(2, RoundingMode.HALF_UP))
+        .orElse(BigDecimal.ZERO);
+  }
 
-    public EmployeeResponseDTO findHighestPaidEmployeeForDepartment(int id) {
-//        entityValidator.validateExists(departmentRepository.checkIfDepartmentExists(id),
-//                () -> new DepartmentNotFoundException(id));
-        Employee employee = employeeRepository.getHighestPaidEmployeeInDepartment(id).
-                stream().
-                findFirst().
-                orElse(null);
-        return employee != null ? employeeMapper.toEmployeeResponseDTO(employee) : null;
-    }
+  public EmployeeResponseDTO findHighestPaidEmployeeForDepartment(int departmentId) {
+    departmentRepository.checkIfDepartmentExists(departmentId);
+    Employee employee =
+        employeeRepository.getHighestPaidEmployeeInDepartment(departmentId).stream()
+            .findFirst()
+            .orElse(null);
+    return employee != null ? employeeMapper.toEmployeeResponseDTO(employee) : null;
+  }
 
-    public Integer findEmployeeCountForDepartment(int id) {
-//        entityValidator.validateExists(departmentRepository.checkIfDepartmentExists(id),
-//                () -> new DepartmentNotFoundException(id));
-        return employeeRepository.getEmployeeCountInDepartment(id).
-                stream().
-                findFirst()
-                .orElse(0);
-    }
+  public int findEmployeeCountForDepartment(int departmentId) {
+    departmentRepository.checkIfDepartmentExists(departmentId);
+    return employeeRepository.getEmployeeCountInDepartment(departmentId);
+  }
 
-    public List<SalaryDistribution> findSalaryDistributionForDepartment(int id) {
-//        entityValidator.validateExists(departmentRepository.checkIfDepartmentExists(id),
-//                () -> new DepartmentNotFoundException(id));
-        List<SalaryDistribution> list = employeeRepository.getSalaryDistributionByDepartmentId(id);
-        return !list.isEmpty() ? list : Collections.emptyList();
-    }
-
-    private void validateCommon(boolean exist,Integer departmentID) {
-        if (!exist) {
-            throw new DepartmentNotFoundException(departmentID);
-        }
-    }
+  public List<SalaryDistribution> findSalaryDistributionForDepartment(int departmentId) {
+    departmentRepository.checkIfDepartmentExists(departmentId);
+    List<SalaryDistribution> list =
+        employeeRepository.getSalaryDistributionByDepartmentId(departmentId);
+    return !list.isEmpty() ? list : Collections.emptyList();
+  }
 }
