@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 @AllArgsConstructor
 public class EntityValidator<T> implements Validator {
 
-    private final Employee employee;
+    private final int=0;
 
     @Override
     public void validate(T object) throws DepartmentNotFoundException{
