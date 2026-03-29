@@ -1,14 +1,17 @@
 package com.example.employee_api.salary;
 
 import com.example.employee_api.common.exceptions.NoActiveSalaryException;
+import com.example.employee_api.common.exceptions.SalaryNotFoundException;
 import com.example.employee_api.salary.model.Salary;
 import com.example.employee_api.salary.model.SalaryEndDate;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -42,7 +45,7 @@ public class SalaryRepository {
     } else ps.setNull(4, Types.DATE);
     ps.setInt(5, salary.getEmployeeId());
     ps.setInt(6, salary.getCreatedBy());
-    ps.setTimestamp(7, Timestamp.valueOf(salary.getCreatedAt()));
+    ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
     return ps;
   }
 
@@ -156,18 +159,16 @@ public class SalaryRepository {
 
   public Salary getSalaryById(int id) {
     String sql =
-        "select id,salary,currency,effective_from,effective_to,employee_id from salaries where id =?;";
-    return jdbcTemplate.queryForObject(
-        sql,
-        (rs, rowNum) -> {
-          return getSalaryResponseDTO(rs);
-        },
-        id);
+        "select salary,currency,effective_from,effective_to,employee_id from salaries where id =?;";
+    try {
+      return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> getSalaryResponseDTO(rs), id);
+    } catch (EmptyResultDataAccessException e) {
+      throw new SalaryNotFoundException(id);
+    }
   }
 
   private static Salary getSalaryResponseDTO(ResultSet rs) throws SQLException {
     Salary salary = new Salary();
-    salary.setId(rs.getInt("id"));
     salary.setSalary(rs.getBigDecimal("salary"));
     salary.setCurrency(rs.getString("currency"));
     salary.setEffectiveFrom(rs.getDate("effective_from").toLocalDate());
@@ -175,6 +176,22 @@ public class SalaryRepository {
       salary.setEffectiveTo(rs.getDate("effective_to").toLocalDate());
     } else salary.setEffectiveTo(null);
     salary.setEmployeeId(rs.getInt("employee_id"));
+    return salary;
+  }
+
+  public Salary getSalaryForEmployeeById(int id) {
+    String sql = "select salary,currency,effective_from,effective_to from salaries ";
+    return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> getSalary(rs), id);
+  }
+
+  private static Salary getSalary(ResultSet rs) throws SQLException {
+    Salary salary = new Salary();
+    salary.setSalary(rs.getBigDecimal("salary"));
+    salary.setCurrency(rs.getString("currency"));
+    salary.setEffectiveFrom(rs.getDate("effective_from").toLocalDate());
+    if (rs.getDate("effective_to") != null) {
+      salary.setEffectiveTo(rs.getDate("effective_to").toLocalDate());
+    } else salary.setEffectiveTo(null);
     return salary;
   }
 

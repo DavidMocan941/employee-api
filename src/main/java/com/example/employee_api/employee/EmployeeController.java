@@ -1,18 +1,18 @@
 package com.example.employee_api.employee;
 
+import com.example.employee_api.employee.dto.EmployeeAndSalaryResponseDTO;
 import com.example.employee_api.employee.dto.EmployeeCreateDTO;
 import com.example.employee_api.employee.dto.EmployeePutDTO;
 import com.example.employee_api.employee.dto.EmployeeResponseDTO;
 import jakarta.validation.Valid;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/employee")
@@ -33,7 +33,7 @@ public class EmployeeController {
             map.put("Cause : ", errors);
             return ResponseEntity.badRequest().body(map);
         }
-        EmployeeResponseDTO response = employeeService.addEmployeeAndSalary(employeeCreateDTO);
+        EmployeeAndSalaryResponseDTO response = employeeService.addEmployeeAndSalary(employeeCreateDTO);
         map.put("Message :", "A new employee added");
         map.put("Employee", response);
         return ResponseEntity.status(HttpStatus.CREATED).body(map);

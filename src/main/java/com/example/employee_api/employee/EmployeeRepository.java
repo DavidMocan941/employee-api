@@ -1,23 +1,24 @@
 package com.example.employee_api.employee;
 
+import com.example.employee_api.common.exceptions.EmailAlreadyExistException;
 import com.example.employee_api.common.exceptions.EmployeeNotFoundException;
 import com.example.employee_api.common.exceptions.NoEmployeeInDepartmentException;
 import com.example.employee_api.department.dto.DepartmentResponseDTO;
+import com.example.employee_api.employee.dto.EmployeeAndSalaryResponseDTO;
+import com.example.employee_api.employee.dto.EmployeeResponseDTO;
 import com.example.employee_api.employee.dto.TopPaidEmployeeResponseDTO;
 import com.example.employee_api.employee.model.Employee;
 import com.example.employee_api.employee.model.SalaryDistribution;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Repository
@@ -45,14 +46,14 @@ public class EmployeeRepository {
     ps.setInt(5, employee.getPositionId());
     ps.setDate(6, Date.valueOf(employee.getBirth()));
     ps.setInt(7, employee.getCreatedBy());
-    ps.setTimestamp(8, Timestamp.valueOf(employee.getCreatedAt()));
+    ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
     return ps;
   }
 
-  public boolean checkAnExistingEmail(String email) {
-    String sql = "select count(*) from employees where email = ? limit 1 ";
-    Integer count = jdbcTemplate.queryForObject(sql, new Object[] {email}, Integer.class);
-    return count != null && count > 0;
+  public void checkAnExistingEmail(String email) {
+    String sql = "select count(*) as count_email from employees where email = ?";
+    int count = jdbcTemplate.queryForObject(sql, Integer.class, email);
+    if (count > 0) throw new EmailAlreadyExistException(email);
   }
 
   public int countEmployeesOfDepartment(int id) {
@@ -76,24 +77,54 @@ public class EmployeeRepository {
         employee.getId());
   }
 
-  public Employee findEmployee(int id) {
+  public EmployeeResponseDTO findEmployee(int id) {
     String sql =
-        "select id,name,surname,email,hire_date,department_id,position_id,birth from employees where id =?;";
-    RowMapper<Employee> rowMapper = (rs, rowNum) -> getEmployeeResponseDTO(rs);
-    return jdbcTemplate.queryForObject(sql, rowMapper, id);
+        "select name,surname,email,hire_date,dep_name,pos_name,birth from employees e "
+            + "join departments d on e.department_id=d.id join positions p on e.position_id = p.id where e.id =?;";
+    return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> getEmployeeResponseDTO(rs), id);
   }
 
-  private static Employee getEmployeeResponseDTO(ResultSet rs) throws SQLException {
-    Employee employee = new Employee();
-    employee.setId(rs.getInt("id"));
-    employee.setName(rs.getString("name"));
-    employee.setSurname(rs.getString("surname"));
-    employee.setEmail(rs.getString("email"));
-    employee.setHireDate(rs.getTimestamp("hire_date").toLocalDateTime());
-    employee.setDepartmentId(rs.getInt("department_id"));
-    employee.setPositionId(rs.getInt("position_id"));
-    employee.setBirth(rs.getDate("birth").toLocalDate());
-    return employee;
+  private static EmployeeResponseDTO getEmployeeResponseDTO(ResultSet rs) throws SQLException {
+    EmployeeResponseDTO responseDTO = new EmployeeResponseDTO();
+    responseDTO.setName(rs.getString("name"));
+    responseDTO.setSurname(rs.getString("surname"));
+    responseDTO.setEmail(rs.getString("email"));
+    responseDTO.setHireDate(rs.getTimestamp("hire_date").toLocalDateTime());
+    responseDTO.setDepartment(rs.getString("dep_name"));
+    responseDTO.setPosition(rs.getString("pos_name"));
+    responseDTO.setBirth(rs.getDate("birth").toLocalDate());
+    return responseDTO;
+  }
+
+  public EmployeeAndSalaryResponseDTO getEmployeeAndSalaryResponseDTO(int employeeId) {
+    String sql =
+        "select name,surname,email,hire_date,dep_name,pos_name,birth,salary,"
+            + "currency,effective_from,effective_to from employees e join"
+            + " departments d on e.department_id=d.id join"
+            + " positions p on e.position_id = p.id join salaries s on e.id = s.employee_id where e.id=?; ";
+    return jdbcTemplate.queryForObject(
+        sql,
+        (rs, rowNum) -> {
+          EmployeeAndSalaryResponseDTO responseDTO = new EmployeeAndSalaryResponseDTO();
+          responseDTO.setName(rs.getString("name"));
+          responseDTO.setSurname(rs.getString("surname"));
+          responseDTO.setEmail(rs.getString("email"));
+          responseDTO.setHireDate(rs.getTimestamp("hire_date").toLocalDateTime());
+          responseDTO.setDepartment(rs.getString("dep_name"));
+          responseDTO.setPosition(rs.getString("pos_name"));
+          responseDTO.setBirth(rs.getDate("birth").toLocalDate());
+          responseDTO.setSalary(rs.getBigDecimal("salary"));
+          responseDTO.setCurrency(rs.getString("currency"));
+          responseDTO.setEffectiveFrom(rs.getDate("effective_from").toLocalDate());
+          Date date = rs.getDate("effective_to");
+          if (date != null) {
+            responseDTO.setEffectiveTo(rs.getDate("effective_to").toLocalDate());
+          } else {
+            responseDTO.setEffectiveTo(null);
+          }
+          return responseDTO;
+        },
+        employeeId);
   }
 
   public void checkIfEmployeeExists(int id) {
@@ -102,22 +133,23 @@ public class EmployeeRepository {
     if (count == 0) throw new EmployeeNotFoundException(id);
   }
 
-  public List<Employee> findAllEmployees() {
+  public List<EmployeeResponseDTO> findAllEmployees() {
     String sql =
-        "select id,name,surname,email,hire_date,department_id,position_id,birth from employees;";
+        "select name,surname,email,hire_date,dep_name,pos_name,birth from employees e join"
+            + " departments d on e.department_id = d.id join"
+            + " positions p on e.position_id = p.id;";
     return jdbcTemplate.query(
         sql,
         rs -> {
-          List<Employee> employees = new ArrayList<>();
+          List<EmployeeResponseDTO> employees = new ArrayList<>();
           while (rs.next()) {
-            Employee employee = new Employee();
-            employee.setId(rs.getInt("id"));
+            EmployeeResponseDTO employee = new EmployeeResponseDTO();
             employee.setName(rs.getString("name"));
             employee.setSurname(rs.getString("surname"));
             employee.setEmail(rs.getString("email"));
             employee.setHireDate(rs.getTimestamp("hire_date").toLocalDateTime());
-            employee.setDepartmentId(rs.getInt("department_id"));
-            employee.setPositionId(rs.getInt("position_id"));
+            employee.setDepartment(rs.getString("dep_name"));
+            employee.setPosition(rs.getString("pos_name"));
             employee.setBirth(rs.getDate("birth").toLocalDate());
             employees.add(employee);
           }
@@ -131,7 +163,7 @@ public class EmployeeRepository {
         sql, employee.isActive(), employee.getDeletedBy(), employee.getDeletedAt(), id);
   }
 
-  public List<Employee> getHighestPaidEmployeeInDepartment(int departmentId) {
+  public EmployeeResponseDTO getHighestPaidEmployeeInDepartment(int departmentId) {
     String sql =
         "SELECT\n"
             + "\tE.ID AS EMP_ID,\n"
@@ -139,12 +171,13 @@ public class EmployeeRepository {
             + "\tSURNAME,\n"
             + "\tEMAIL,\n"
             + "\tHIRE_DATE,\n"
-            + "\tDEPARTMENT_ID,\n"
-            + "\tPOSITION_ID,\n"
+            + "\tDEP_name,\n"
+            + "\tPOS_name,\n"
             + "\tBIRTH\n"
             + "FROM\n"
             + "\tEMPLOYEES E\n"
-            + "\tJOIN SALARIES S ON S.EMPLOYEE_ID = E.ID\n"
+            + "\tJOIN SALARIES S ON S.EMPLOYEE_ID = E.ID join"
+            + " departments d on e.department_id = d.id join positions p on e.position_id = p.id\n"
             + "WHERE\n"
             + "\tDEPARTMENT_ID = ?\n"
             + "\tAND EFFECTIVE_FROM <= NOW()\n"
@@ -157,28 +190,25 @@ public class EmployeeRepository {
             + "LIMIT\n"
             + "\t1;";
 
-    jdbcTemplate.query(
+    return jdbcTemplate.query(
         sql,
         rs -> {
-          List<Employee> list = new ArrayList<>();
-          extracted(rs, list);
-          return list;
+          EmployeeResponseDTO responseDTO = new EmployeeResponseDTO();
+          extracted(rs, responseDTO);
+          return responseDTO;
         },
         departmentId);
   }
 
-  private static void extracted(ResultSet rs, List<Employee> list) throws SQLException {
+  private static void extracted(ResultSet rs, EmployeeResponseDTO responseDTO) throws SQLException {
     while (rs.next()) {
-      Employee employee = new Employee();
-      employee.setId(rs.getInt("emp_id"));
-      employee.setName(rs.getString("name"));
-      employee.setSurname(rs.getString("surname"));
-      employee.setEmail(rs.getString("email"));
-      employee.setHireDate(rs.getTimestamp("hire_date").toLocalDateTime());
-      employee.setDepartmentId(rs.getInt("department_id"));
-      employee.setPositionId(rs.getInt("position_id"));
-      employee.setBirth(rs.getDate("birth").toLocalDate());
-      list.add(employee);
+      responseDTO.setName(rs.getString("name"));
+      responseDTO.setSurname(rs.getString("surname"));
+      responseDTO.setEmail(rs.getString("email"));
+      responseDTO.setHireDate(rs.getTimestamp("hire_date").toLocalDateTime());
+      responseDTO.setDepartment(rs.getString("dep_name"));
+      responseDTO.setPosition(rs.getString("pos_name"));
+      responseDTO.setBirth(rs.getDate("birth").toLocalDate());
     }
   }
 
@@ -278,7 +308,7 @@ public class EmployeeRepository {
     }
   }
 
-  public List<Employee> getEmployeeWithSalaryIncreaseThisYear() {
+  public List<EmployeeResponseDTO> getEmployeeWithSalaryIncreaseThisYear() {
     String sql =
         "SELECT\n"
             + "\tID,\n"
@@ -320,24 +350,23 @@ public class EmployeeRepository {
         });
   }
 
-  private static List<Employee> getEmployees(ResultSet rs) throws SQLException {
-    List<Employee> list = new ArrayList<>();
+  private static List<EmployeeResponseDTO> getEmployees(ResultSet rs) throws SQLException {
+    List<EmployeeResponseDTO> list = new ArrayList<>();
     while (rs.next()) {
-      Employee employee = new Employee();
-      employee.setId(rs.getInt("id"));
-      employee.setName(rs.getString("name"));
-      employee.setSurname(rs.getString("surname"));
-      employee.setEmail(rs.getString("email"));
-      employee.setHireDate(rs.getTimestamp("hire_date").toLocalDateTime());
-      employee.setDepartmentId(rs.getInt("department_id"));
-      employee.setPositionId(rs.getInt("position_id"));
-      employee.setBirth(rs.getDate("birth").toLocalDate());
-      list.add(employee);
+      EmployeeResponseDTO responseDTO = new EmployeeResponseDTO();
+      responseDTO.setName(rs.getString("name"));
+      responseDTO.setSurname(rs.getString("surname"));
+      responseDTO.setEmail(rs.getString("email"));
+      responseDTO.setHireDate(rs.getTimestamp("hire_date").toLocalDateTime());
+      responseDTO.setDepartment(rs.getString("dep_name"));
+      responseDTO.setPosition(rs.getString("pos_name"));
+      responseDTO.setBirth(rs.getDate("birth").toLocalDate());
+      list.add(responseDTO);
     }
     return list;
   }
 
-  public List<Employee> getEmployeeWithSalaryDecrease() {
+  public List<EmployeeResponseDTO> getEmployeeWithSalaryDecrease() {
     String sql =
         "SELECT\n"
             + "\tID,\n"
@@ -345,11 +374,11 @@ public class EmployeeRepository {
             + "\tSURNAME,\n"
             + "\tEMAIL,\n"
             + "\tHIRE_DATE,\n"
-            + "\tDEPARTMENT_ID,\n"
-            + "\tPOSITION_ID,\n"
+            + "\tDEP_name,\n"
+            + "\tPOS_name,\n"
             + "\tBIRTH\n"
             + "FROM\n"
-            + "\tEMPLOYEES\n"
+            + "\tEMPLOYEES e join departments d on e.department_id= d.id join positions p on e.positions_id = p.id\n"
             + "WHERE\n"
             + "\tID IN (\n"
             + "\t\tSELECT\n"
@@ -379,22 +408,21 @@ public class EmployeeRepository {
     return jdbcTemplate.query(
         sql,
         rs -> {
-          List<Employee> employees = new ArrayList<>();
+          List<EmployeeResponseDTO> employees = new ArrayList<>();
           return getEmployees(rs, employees);
         });
   }
 
-  private static List<Employee> getEmployees(ResultSet rs, List<Employee> employees)
-      throws SQLException {
+  private static List<EmployeeResponseDTO> getEmployees(
+      ResultSet rs, List<EmployeeResponseDTO> employees) throws SQLException {
     while (rs.next()) {
-      Employee employee = new Employee();
-      employee.setId(rs.getInt("id"));
+      EmployeeResponseDTO employee = new EmployeeResponseDTO();
       employee.setName(rs.getString("name"));
       employee.setSurname(rs.getString("surname"));
       employee.setEmail(rs.getString("email"));
       employee.setHireDate(rs.getTimestamp("hire_date").toLocalDateTime());
-      employee.setDepartmentId(rs.getInt("department_id"));
-      employee.setPositionId(rs.getInt("position_id"));
+      employee.setDepartment(rs.getString("dep_name"));
+      employee.setPosition(rs.getString("pos_n"));
       employee.setBirth(rs.getDate("birth").toLocalDate());
       employees.add(employee);
     }

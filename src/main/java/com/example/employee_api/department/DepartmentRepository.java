@@ -5,9 +5,8 @@ import com.example.employee_api.department.dto.DepartmentResponseDTO;
 import com.example.employee_api.department.dto.DepartmentSalaryBudgetDTO;
 import com.example.employee_api.department.model.Department;
 import java.sql.PreparedStatement;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -16,16 +15,13 @@ import org.springframework.stereotype.Repository;
 public class DepartmentRepository {
   private final JdbcTemplate jdbcTemplate;
 
-  public Optional<Integer> findIdByDepartment(String department) {
+  public int findIdByDepartment(String department) {
     String sql = "select id from departments where dep_name = ?";
-    List<Integer> list =
-        jdbcTemplate.query(
-            sql,
-            (rs, row) -> {
-              return rs.getInt("id");
-            },
-            department);
-    return list.stream().findFirst();
+    try {
+      return jdbcTemplate.queryForObject(sql, Integer.class, department);
+    } catch (EmptyResultDataAccessException e) {
+      throw new DepartmentNotFoundException(department);
+    }
   }
 
   public int deleteDepartmentFromDb(int id) {

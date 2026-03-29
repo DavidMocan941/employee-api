@@ -4,7 +4,6 @@ import com.example.employee_api.department.DepartmentRepository;
 import com.example.employee_api.employee.EmployeeRepository;
 import com.example.employee_api.employee.dto.EmployeeResponseDTO;
 import com.example.employee_api.employee.mapper.EmployeeMapper;
-import com.example.employee_api.employee.model.Employee;
 import com.example.employee_api.employee.model.SalaryDistribution;
 import com.example.employee_api.salary.SalaryRepository;
 import java.math.BigDecimal;
@@ -54,11 +53,7 @@ public class DepartmentAnalyticsService {
 
   public EmployeeResponseDTO findHighestPaidEmployeeForDepartment(int departmentId) {
     departmentRepository.checkIfDepartmentExists(departmentId);
-    Employee employee =
-        employeeRepository.getHighestPaidEmployeeInDepartment(departmentId).stream()
-            .findFirst()
-            .orElse(null);
-    return employee != null ? employeeMapper.toEmployeeResponseDTO(employee) : null;
+    return employeeRepository.getHighestPaidEmployeeInDepartment(departmentId);
   }
 
   public int findEmployeeCountForDepartment(int departmentId) {
