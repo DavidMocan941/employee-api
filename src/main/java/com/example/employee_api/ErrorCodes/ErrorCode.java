@@ -15,7 +15,6 @@ public enum ErrorCode {
     NOT_FOUND(404, "Resource Not Found"),
     CONFLICT(409, "Conflict"),
     VALIDATION_ERROR(422, "Validation Error");
-    SLAVOIC_NUI_ACASA
 
     private final int status;
     private final String message;

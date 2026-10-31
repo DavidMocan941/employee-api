@@ -31,7 +31,7 @@ public class AnalyticsController {
     private final CompanyAnalyticsService companyAnalyticsService;
     private final SalaryAnalyticsService salaryAnalyticsService;
 
-    @GetMapping("/employee/{id}/salary/average")
+    /*@GetMapping("/employee/{id}/salary/average")
     public ResponseEntity<Map<Object, Object>> getAvgSalaryOfEmployee(@PathVariable int id) {
         Map<Object, Object> map = new HashMap<>();
         BigDecimal avg = employeeAnalyticsService.findEmployeeAvgSalary(id);
@@ -74,7 +74,7 @@ public class AnalyticsController {
         map.put("Message:", "Got change salary count for employee with id:" + id);
         map.put("Salary Change Count:", count);
         return ResponseEntity.ok().body(map);
-    }
+    }*/
 
     @GetMapping("/department/{id}/salary/average")
     public ResponseEntity<Map<Object, Object>> getSalaryAverageOfDepartment(@PathVariable int id) {

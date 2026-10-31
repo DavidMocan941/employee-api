@@ -23,7 +23,7 @@ public class EmployeeAnalyticsService {
     private final EmployeeRepository employeeRepository;
     private final Validator entityValidator;
 
-    public BigDecimal findEmployeeAvgSalary(int id) {
+   /* public BigDecimal findEmployeeAvgSalary(int id) {
         entityValidator.validateExists(employeeRepository.checkIfEmployeeExists(id),
                 () -> new EmployeeNotFoundException(id));
         return salaryRepository.getAverageSalaryById(id).setScale(2, RoundingMode.HALF_UP);
@@ -55,5 +55,5 @@ public class EmployeeAnalyticsService {
         entityValidator.validateExists(employeeRepository.checkIfEmployeeExists(id),
                 () -> new EmployeeNotFoundException(id));
         return salaryRepository.getSalaryChangeCountById(id);
-    }
+    }*/
 }

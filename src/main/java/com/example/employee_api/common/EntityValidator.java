@@ -16,19 +16,13 @@ import java.util.function.Supplier;
 @AllArgsConstructor
 public class EntityValidator<T> implements Validator {
 
-    private final Employee employee;
+
+
+
 
     @Override
-    public boolean valide(T object) throws DepartmentNotFoundException{
-        if (employee == null) {
-            throw new DepartmentNotFoundException(id);
-        } else if (employee.getEmail())
-    }
+    public void validate() {
 
-//    public void validateExists(boolean exists, Supplier<? extends BaseApiException> exception) {
-//        if (!exists) {
-//            throw exception.get();
-//        }
-//    }
+    }
 
 }
