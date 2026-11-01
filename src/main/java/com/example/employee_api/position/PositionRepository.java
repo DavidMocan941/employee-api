@@ -14,9 +14,8 @@ public class PositionRepository {
 
     public Optional<Integer> findIdByPosition(String position) {
         String sql = "select id from positions where pos_name = ?";
-        List<Integer> list = jdbcTemplate.query(sql, (rs, row) -> {
-            return rs.getInt("id");
-        }, position);
+        List<Integer> list = jdbcTemplate.query(sql, (rs, row) ->
+                rs.getInt("id"), position);
         return list.stream().findFirst();
     }
 }

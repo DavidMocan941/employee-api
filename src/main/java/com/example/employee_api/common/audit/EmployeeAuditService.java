@@ -9,13 +9,6 @@ import java.time.LocalDateTime;
 public class EmployeeAuditService {
     final Integer userId = 1;
 
-    public void setAuditFieldsWhenCreate(Employee employee) {
-        EmployeeAudit audit = new EmployeeAudit();
-        audit.setCreatedAt(LocalDateTime.now());
-        audit.setCreatedBy(userId);
-        employee.setCreatedBy(audit.getCreatedBy());
-        employee.setCreatedAt(audit.getCreatedAt());
-    }
 
     public void setAuditFieldsWhenUpdate(Employee employee) {
         EmployeeAudit audit = new EmployeeAudit();

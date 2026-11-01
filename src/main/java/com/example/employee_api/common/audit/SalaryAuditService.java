@@ -16,13 +16,13 @@ public class SalaryAuditService {
         salary.setUpdatedBy(audit.getUpdatedBy());
     }
 
-    public void setAuditFieldsWhenCreate(Salary salary) {
+    /*public void setAuditFieldsWhenCreate(Salary salary) {
         Integer userId = 1;
         SalaryAudit audit = new SalaryAudit();
         audit.setCreatedAt(LocalDateTime.now());
         audit.setCreatedBy(userId);
         salary.setCreatedBy(audit.getCreatedBy());
         salary.setCreatedAt(audit.getCreatedAt());
-    }
+    }*/
 
 }

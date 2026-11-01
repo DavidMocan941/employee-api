@@ -1,10 +1,9 @@
 package com.example.employee_api.employee;
 
 import com.example.employee_api.common.audit.EmployeeAuditService;
-import com.example.employee_api.common.audit.SalaryAuditService;
 import com.example.employee_api.common.exceptions.*;
-import com.example.employee_api.employee.dto.EmployeeCreateDTO;
 import com.example.employee_api.department.DepartmentRepository;
+import com.example.employee_api.employee.dto.EmployeeCreateDTO;
 import com.example.employee_api.employee.dto.EmployeePutDTO;
 import com.example.employee_api.employee.dto.EmployeeResponseDTO;
 import com.example.employee_api.employee.mapper.EmployeeMapper;
@@ -13,15 +12,14 @@ import com.example.employee_api.position.PositionRepository;
 import com.example.employee_api.salary.SalaryRepository;
 import com.example.employee_api.salary.mapper.SalaryMapper;
 import com.example.employee_api.salary.model.Salary;
+import com.example.employee_api.validation.employee.EmployeeCreationValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -34,47 +32,25 @@ public class EmployeeService {
     private final EmployeeMapper employeeMapper;
     private final EmployeeAuditService auditService;
     private final SalaryMapper salaryMapper;
-    private final SalaryAuditService salaryAuditService;
+    private final EmployeeCreationValidator employeeCreationValidator;
 
     @Transactional
     public EmployeeResponseDTO addEmployeeAndSalary(EmployeeCreateDTO employeeCreateDTO) {
-        log.info("Creating an employee with email: {}", employeeCreateDTO.getEmail());
-        boolean result = employeeRepository.checkAnExistingEmail(employeeCreateDTO.getEmail());
-        if (result) {
-            log.warn("Employee creation failed - email already exists: {}", employeeCreateDTO.getEmail());
-            throw new EmailAlreadyExistException(employeeCreateDTO.getEmail());
-        }
-        LocalDate effectiveFrom = Optional.ofNullable(employeeCreateDTO.getEffectiveFrom()).
-                orElse(LocalDate.now());
-        log.debug("Effective from calculated as: {}", effectiveFrom);
-        if (employeeCreateDTO.getEffectiveTo() != null &&
-                employeeCreateDTO.getEffectiveTo().isBefore(effectiveFrom)) {
-            log.warn("Invalid salary date range for email {}", employeeCreateDTO.getEmail());
-            throw new InvalidDataRangeException();
-        }
-        log.debug("Resolving department '{}' and position '{}'",
-                employeeCreateDTO.getDepartmentName(), employeeCreateDTO.getPositionName());
-        int departmentId = departmentRepository.findIdByDepartment(employeeCreateDTO.getDepartmentName()).
-                orElseThrow(() -> new DepartmentNotFoundException(employeeCreateDTO.getDepartmentName()));
 
-        int positionId = positionRepository.findIdByPosition(employeeCreateDTO.getPositionName()).
-                orElseThrow(() -> new PositionNotFoundException(employeeCreateDTO.getPositionName()));
+        employeeCreationValidator.validate(employeeCreateDTO);
 
-        Employee employee = employeeMapper.toEmployee(employeeCreateDTO);
-        employee.setDepartmentId(departmentId);
-        employee.setPositionId(positionId);
-        auditService.setAuditFieldsWhenCreate(employee);
+        int departmentId = departmentResolver(employeeCreateDTO.getDepartmentName());
+        int positionId = positionResolver(employeeCreateDTO.getPositionName());
+
+        Employee employee = employeeMapper.toEmployee(employeeCreateDTO, departmentId, positionId);
         int employeeKey = employeeRepository.insertEmployee(employee);
-        Salary salary = salaryMapper.toSalary(employeeCreateDTO);
-        salary.setEffectiveFrom(effectiveFrom);
-        salary.setEmployeeId(employeeKey);
-        salaryAuditService.setAuditFieldsWhenCreate(salary);
-        int salaryKey = salaryRepository.insertSalary(salary);
-        log.info("Successfully created and employee with ID {}", employeeKey);
-        EmployeeResponseDTO responseDTO = employeeMapper.
-                toEmployeeResponseDTO(employeeRepository.findEmployee(employeeKey),
-                        salaryRepository.getSalaryById(salaryKey));
-        return responseDTO;
+
+        Salary salary = salaryMapper.toSalary(employeeCreateDTO, employeeKey);
+        salaryRepository.insertSalary(salary);
+
+
+        return employeeMapper.toEmployeeResponseDTO(employee, salary);
+
     }
 
     public EmployeeResponseDTO getUpdatedEmployee(int id, EmployeePutDTO employeePutDTO) {
@@ -137,6 +113,17 @@ public class EmployeeService {
         auditService.setAuditFieldsWhenDelete(employee);
         employee.setActive(false);
         employeeRepository.deleteEmployeeById(id, employee);
+    }
+
+    private int departmentResolver(String department) {
+        return departmentRepository.findIdByDepartment(department).
+                orElseThrow(() -> new DepartmentNotFoundException(department));
+    }
+
+    private int positionResolver(String position) {
+        return positionRepository.findIdByPosition(position).
+                orElseThrow(() -> new PositionNotFoundException(position));
+
     }
 }
 

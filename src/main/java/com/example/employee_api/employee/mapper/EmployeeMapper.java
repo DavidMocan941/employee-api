@@ -10,12 +10,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmployeeMapper {
     //Mapping EmployeeCreateDTO to Employee entity when create a new employee
-    public Employee toEmployee(EmployeeCreateDTO employeeCreateDTO) {
+
+    public Employee toEmployee(EmployeeCreateDTO employeeCreateDTO, int departmentId, int positionId) {
         Employee employee = new Employee();
         employee.setName(employeeCreateDTO.getName());
         employee.setSurname(employeeCreateDTO.getSurname());
         employee.setEmail(employeeCreateDTO.getEmail());
         employee.setBirth(employeeCreateDTO.getBirth());
+        employee.setPositionId(positionId);
+        employee.setDepartmentId(departmentId);
         return employee;
     }
 

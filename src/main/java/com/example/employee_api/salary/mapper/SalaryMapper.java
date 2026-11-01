@@ -12,11 +12,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class SalaryMapper {
     //Used when Mapping EmployeeCreateDTO salary fields to Salary entity
-    public Salary toSalary(EmployeeCreateDTO employeeCreateDTO) {
+    public Salary toSalary(EmployeeCreateDTO employeeCreateDTO, int employeeId) {
         Salary salary = new Salary();
         salary.setSalary(employeeCreateDTO.getSalary());
         salary.setCurrency(employeeCreateDTO.getCurrency());
+        salary.setEffectiveFrom(employeeCreateDTO.getEffectiveFrom());
         salary.setEffectiveTo(employeeCreateDTO.getEffectiveTo());
+        salary.setEmployeeId(employeeId);
         return salary;
     }
 
