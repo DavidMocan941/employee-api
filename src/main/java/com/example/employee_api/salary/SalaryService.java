@@ -66,7 +66,7 @@ public class SalaryService {
         salaryRepository.insertPastSalaryEndDate(salaryEndDate.getId(), salaryEndDate.getEffectiveTo());
         log.info("Mapping SalaryCreateDTO to Salary entity");
         Salary salary = salaryMapper.toSalary(salaryCreateDTO);
-        salaryAuditService.setAuditFieldsWhenCreate(salary);
+        //salaryAuditService.setAuditFieldsWhenCreate(salary);
         salary.setEffectiveFrom(effectiveFrom);
         log.info("Inserting a new salary");
         int key = salaryRepository.insertNewSalary(salary);
