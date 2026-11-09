@@ -3,16 +3,18 @@ package com.example.employee_api.employee;
 import com.example.employee_api.common.audit.EmployeeAuditService;
 import com.example.employee_api.common.exceptions.*;
 import com.example.employee_api.department.DepartmentRepository;
-import com.example.employee_api.employee.dto.EmployeeCreateDTO;
-import com.example.employee_api.employee.dto.EmployeePutDTO;
-import com.example.employee_api.employee.dto.EmployeeResponseDTO;
+import com.example.employee_api.employee.dto.EmployeeCreateDto;
+import com.example.employee_api.employee.dto.EmployeePutDto;
+import com.example.employee_api.employee.dto.EmployeeResponseDto;
 import com.example.employee_api.employee.mapper.EmployeeMapper;
 import com.example.employee_api.employee.model.Employee;
 import com.example.employee_api.position.PositionRepository;
 import com.example.employee_api.salary.SalaryRepository;
 import com.example.employee_api.salary.mapper.SalaryMapper;
 import com.example.employee_api.salary.model.Salary;
+import com.example.employee_api.validation.context.EmployeeUpdateContext;
 import com.example.employee_api.validation.employee.EmployeeCreationValidator;
+import com.example.employee_api.validation.employee.EmployeeUpdatingValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,9 +35,10 @@ public class EmployeeService {
   private final EmployeeAuditService auditService;
   private final SalaryMapper salaryMapper;
   private final EmployeeCreationValidator employeeCreationValidator;
+  private final EmployeeUpdatingValidator employeeUpdatingValidator;
 
   @Transactional
-  public EmployeeResponseDTO addEmployeeAndSalary(EmployeeCreateDTO employeeCreateDTO) {
+  public EmployeeResponseDto addEmployeeAndSalary(EmployeeCreateDto employeeCreateDTO) {
 
     employeeCreationValidator.validate(employeeCreateDTO);
 
@@ -51,53 +54,36 @@ public class EmployeeService {
     return employeeMapper.toEmployeeResponseDTO(employee);
   }
 
-  public EmployeeResponseDTO updateEmployee(int id, EmployeePutDTO employeePutDTO) {
-    log.info("Checking if employee exists with id: {}", id);
-    boolean empExists = employeeRepository.checkIfEmployeeExists(id);
-    if (!empExists) {
-      log.warn("Employee not found with id: {}", id);
-      throw new EmployeeNotFoundException(id);
-    }
-    log.info("Checking an existing email: {}", employeePutDTO.getEmail());
-    boolean emailExists = employeeRepository.checkAnExistingEmail(employeePutDTO.getEmail());
-    if (emailExists) {
-      log.warn("Exist an employee with the same email: {}", employeePutDTO.getEmail());
-      throw new EmailAlreadyExistException(employeePutDTO.getEmail());
-    }
-    log.debug(
-        "Resolving department: {} and position: {}",
-        employeePutDTO.getDepartmentName(),
-        employeePutDTO.getPositionName());
-    int departmentId =
-        departmentRepository
-            .findIdByDepartment(employeePutDTO.getDepartmentName())
-            .orElseThrow(() -> new DepartmentNotFoundException(employeePutDTO.getDepartmentName()));
-    int positionId =
-        positionRepository
-            .findIdByPosition(employeePutDTO.getPositionName())
-            .orElseThrow(() -> new PositionNotFoundException(employeePutDTO.getPositionName()));
-    log.debug("Mapping EmployeePutDTO to Employee entity");
-    Employee employee = employeeMapper.toEmployee(id, employeePutDTO, departmentId, positionId);
-    auditService.setAuditFieldsWhenUpdate(employee);
-    log.info("Update employee with id: {}", id);
+  public EmployeeResponseDto updateEmployee(int id, EmployeePutDto dto) {
+    // todo 1)create tests for validator
+
+    employeeUpdatingValidator.validate(new EmployeeUpdateContext(id, dto));
+    int departmentId = departmentResolver(dto.getDepartmentName());
+    int positionId = positionResolver(dto.getPositionName());
+    // todo 2)create tests for this mapper
+    Employee employee = employeeMapper.toEmployee(id, dto, departmentId, positionId);
+
+    // auditService.setAuditFieldsWhenUpdate(employee);
+
+    // todo 2)fullyUpdateEmployeeById must return the updated employee
     employeeRepository.fullyUpdateEmployeeById(employee);
     Employee responseEmployee = employeeRepository.findEmployee(id);
-    EmployeeResponseDTO responseDTO = employeeMapper.toEmployeeResponseDTO(responseEmployee);
-    return responseDTO;
+
+    return employeeMapper.toEmployeeResponseDTO(responseEmployee);
   }
 
-  public EmployeeResponseDTO getEmployee(int id) {
+  public EmployeeResponseDto getEmployee(int id) {
     boolean exists = employeeRepository.checkIfEmployeeExists(id);
     if (!exists) {
       throw new EmployeeNotFoundException(id);
     }
     Employee employee = employeeRepository.findEmployee(id);
-    EmployeeResponseDTO responseDTO = employeeMapper.toEmployeeResponseDTO(employee);
+    EmployeeResponseDto responseDTO = employeeMapper.toEmployeeResponseDTO(employee);
     return responseDTO;
   }
 
-  public List<EmployeeResponseDTO> getAllEmployees() {
-    List<EmployeeResponseDTO> response =
+  public List<EmployeeResponseDto> getAllEmployees() {
+    List<EmployeeResponseDto> response =
         employeeRepository.findAllEmployees().stream()
             .sorted(Comparator.comparing(Employee::getId).reversed())
             .map(employeeMapper::toEmployeeResponseDTO)

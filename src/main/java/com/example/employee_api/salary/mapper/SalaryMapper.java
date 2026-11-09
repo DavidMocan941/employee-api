@@ -1,7 +1,7 @@
 package com.example.employee_api.salary.mapper;
 
 
-import com.example.employee_api.employee.dto.EmployeeCreateDTO;
+import com.example.employee_api.employee.dto.EmployeeCreateDto;
 import com.example.employee_api.salary.dto.SalaryCreateDTO;
 import com.example.employee_api.salary.dto.SalaryHistoryResponseDTO;
 import com.example.employee_api.salary.dto.SalaryPatchDTO;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SalaryMapper {
     //Used when Mapping EmployeeCreateDTO salary fields to Salary entity
-    public Salary toSalary(EmployeeCreateDTO employeeCreateDTO, int employeeId) {
+    public Salary toSalary(EmployeeCreateDto employeeCreateDTO, int employeeId) {
         Salary salary = new Salary();
         salary.setSalary(employeeCreateDTO.getSalary());
         salary.setCurrency(employeeCreateDTO.getCurrency());

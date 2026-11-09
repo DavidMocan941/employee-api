@@ -6,8 +6,8 @@ import com.example.employee_api.analytics.service.EmployeeAnalyticsService;
 import com.example.employee_api.analytics.service.SalaryAnalyticsService;
 import com.example.employee_api.department.dto.DepartmentResponseDTO;
 import com.example.employee_api.department.dto.DepartmentSalaryBudgetDTO;
-import com.example.employee_api.employee.dto.EmployeeResponseDTO;
-import com.example.employee_api.employee.dto.TopPaidEmployeeResponseDTO;
+import com.example.employee_api.employee.dto.EmployeeResponseDto;
+import com.example.employee_api.employee.dto.TopPaidEmployeeResponseDto;
 import com.example.employee_api.employee.model.SalaryDistribution;
 import com.example.employee_api.salary.dto.SalaryResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -97,7 +97,7 @@ public class AnalyticsController {
     @GetMapping("/department/{id}/employee/highest-paid")
     public ResponseEntity<Map<Object, Object>> getHighestPaidEmployeeOfDepartment(@PathVariable int id) {
         Map<Object, Object> map = new HashMap<>();
-        EmployeeResponseDTO responseDTO = departmentAnalyticsService.findHighestPaidEmployeeForDepartment(id);
+        EmployeeResponseDto responseDTO = departmentAnalyticsService.findHighestPaidEmployeeForDepartment(id);
         map.put("Message:", "Got the highest paid employee for department with id:" + id);
         map.put("Employee: ", responseDTO);
         return ResponseEntity.ok().body(map);
@@ -142,7 +142,7 @@ public class AnalyticsController {
     @GetMapping("/company/employees/top-paid")
     public ResponseEntity<Map<Object, Object>> getTopPaidEmployeesOfCompany() {
         Map<Object, Object> map = new HashMap<>();
-        List<TopPaidEmployeeResponseDTO> topPaidEmployees = companyAnalyticsService.findCompanyTopPaidEmployees();
+        List<TopPaidEmployeeResponseDto> topPaidEmployees = companyAnalyticsService.findCompanyTopPaidEmployees();
         map.put("Message:", "Got the top paid employees of the company");
         map.put("Top paid employees: ", topPaidEmployees);
         return ResponseEntity.ok().body(map);
@@ -169,7 +169,7 @@ public class AnalyticsController {
     @GetMapping("/company/employee/salary-increase-this-year")
     public ResponseEntity<Map<Object, Object>> getEmployeesWithSalaryIncreaseThisYear() {
         Map<Object, Object> map = new HashMap<>();
-        List<EmployeeResponseDTO> employees = salaryAnalyticsService.findEmployeesWithSalaryIncreaseThisYear();
+        List<EmployeeResponseDto> employees = salaryAnalyticsService.findEmployeesWithSalaryIncreaseThisYear();
         map.put("Message:", "Got employees with salary increase this year");
         map.put("Employees:", employees);
         return ResponseEntity.ok().body(map);
@@ -178,7 +178,7 @@ public class AnalyticsController {
     @GetMapping("/company/employee/salary-decrease")
     public ResponseEntity<Map<Object, Object>> getEmployeesWithSalaryDecrease() {
         Map<Object, Object> map = new HashMap<>();
-        List<EmployeeResponseDTO> employees = salaryAnalyticsService.findEmployeesWithSalaryDecrease();
+        List<EmployeeResponseDto> employees = salaryAnalyticsService.findEmployeesWithSalaryDecrease();
         map.put("Message:", "Got employees with salary decrease");
         map.put("Employees:", employees);
         return ResponseEntity.ok().body(map);

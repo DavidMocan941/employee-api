@@ -1,7 +1,7 @@
 package com.example.employee_api.employee;
 
 import com.example.employee_api.department.dto.DepartmentResponseDTO;
-import com.example.employee_api.employee.dto.TopPaidEmployeeResponseDTO;
+import com.example.employee_api.employee.dto.TopPaidEmployeeResponseDto;
 import com.example.employee_api.employee.model.Employee;
 import com.example.employee_api.employee.model.SalaryDistribution;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -216,7 +215,7 @@ public class EmployeeRepository {
         }
     }
 
-    public List<TopPaidEmployeeResponseDTO> getCompanyTopPaidEmployees() {
+    public List<TopPaidEmployeeResponseDto> getCompanyTopPaidEmployees() {
         String sql = "SELECT\n" +
                 "\tE.ID AS EMP_ID,\n" +
                 "\tNAME,\n" +
@@ -239,15 +238,15 @@ public class EmployeeRepository {
                 "LIMIT\n" +
                 "\t5;";
         return jdbcTemplate.query(sql, rs -> {
-            List<TopPaidEmployeeResponseDTO> list = new ArrayList<>();
+            List<TopPaidEmployeeResponseDto> list = new ArrayList<>();
             extracted2(rs, list);
             return list;
         });
     }
 
-    private static void extracted2(ResultSet rs, List<TopPaidEmployeeResponseDTO> list) throws SQLException {
+    private static void extracted2(ResultSet rs, List<TopPaidEmployeeResponseDto> list) throws SQLException {
         while (rs.next()) {
-            TopPaidEmployeeResponseDTO responseDTO = new TopPaidEmployeeResponseDTO();
+            TopPaidEmployeeResponseDto responseDTO = new TopPaidEmployeeResponseDto();
             responseDTO.setId(rs.getInt("EMP_ID"));
             responseDTO.setName(rs.getString("NAME"));
             responseDTO.setSurname(rs.getString("SURNAME"));

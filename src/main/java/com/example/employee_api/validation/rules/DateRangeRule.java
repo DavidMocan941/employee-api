@@ -11,15 +11,12 @@ import java.util.Optional;
 @Slf4j
 public class DateRangeRule {
 
-    public LocalDate checkDateRange(LocalDate effectiveFrom, LocalDate effectiveTo) {
-        LocalDate actualEffectiveFrom = Optional.ofNullable(effectiveFrom).
-                orElse(LocalDate.now());
-        log.debug("Effective from calculated as: {}", actualEffectiveFrom);
+  public LocalDate checkDateRange(LocalDate effectiveFrom, LocalDate effectiveTo) {
+    LocalDate actualEffectiveFrom = Optional.ofNullable(effectiveFrom).orElse(LocalDate.now());
 
-        if (effectiveTo != null &&
-                effectiveTo.isBefore(actualEffectiveFrom)) {
-            throw new InvalidDataRangeException();
-        }
-        return actualEffectiveFrom;
+    if (effectiveTo != null && effectiveTo.isBefore(actualEffectiveFrom)) {
+      throw new InvalidDataRangeException();
     }
+    return actualEffectiveFrom;
+  }
 }

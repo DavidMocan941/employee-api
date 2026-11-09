@@ -3,9 +3,8 @@ package com.example.employee_api.analytics.service;
 import com.example.employee_api.common.EntityValidator;
 import com.example.employee_api.common.exceptions.DepartmentNotFoundException;
 import com.example.employee_api.department.DepartmentRepository;
-import com.example.employee_api.department.model.Department;
 import com.example.employee_api.employee.EmployeeRepository;
-import com.example.employee_api.employee.dto.EmployeeResponseDTO;
+import com.example.employee_api.employee.dto.EmployeeResponseDto;
 import com.example.employee_api.employee.mapper.EmployeeMapper;
 import com.example.employee_api.employee.model.Employee;
 import com.example.employee_api.salary.SalaryRepository;
@@ -45,7 +44,7 @@ public class DepartmentAnalyticsService {
                 orElse(BigDecimal.ZERO);
     }
 
-    public EmployeeResponseDTO findHighestPaidEmployeeForDepartment(int id) {
+    public EmployeeResponseDto findHighestPaidEmployeeForDepartment(int id) {
 //        entityValidator.validateExists(departmentRepository.checkIfDepartmentExists(id),
 //                () -> new DepartmentNotFoundException(id));
         Employee employee = employeeRepository.getHighestPaidEmployeeInDepartment(id).

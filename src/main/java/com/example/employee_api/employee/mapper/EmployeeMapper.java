@@ -1,17 +1,16 @@
 package com.example.employee_api.employee.mapper;
 
-import com.example.employee_api.employee.dto.EmployeeCreateDTO;
-import com.example.employee_api.employee.dto.EmployeePutDTO;
-import com.example.employee_api.employee.dto.EmployeeResponseDTO;
+import com.example.employee_api.employee.dto.EmployeeCreateDto;
+import com.example.employee_api.employee.dto.EmployeePutDto;
+import com.example.employee_api.employee.dto.EmployeeResponseDto;
 import com.example.employee_api.employee.model.Employee;
-import com.example.employee_api.salary.model.Salary;
 import org.springframework.stereotype.Component;
 
 @Component
 public class EmployeeMapper {
 
   public Employee toEmployee(
-      EmployeeCreateDTO employeeCreateDTO, int departmentId, int positionId) {
+      EmployeeCreateDto employeeCreateDTO, int departmentId, int positionId) {
     Employee employee = new Employee();
     employee.setName(employeeCreateDTO.getName());
     employee.setSurname(employeeCreateDTO.getSurname());
@@ -22,8 +21,8 @@ public class EmployeeMapper {
     return employee;
   }
 
-  public EmployeeResponseDTO toEmployeeResponseDTO(Employee employee) {
-    EmployeeResponseDTO dto = new EmployeeResponseDTO();
+  public EmployeeResponseDto toEmployeeResponseDTO(Employee employee) {
+    EmployeeResponseDto dto = new EmployeeResponseDto();
     dto.setId(employee.getId());
     dto.setName(employee.getName());
     dto.setSurname(employee.getSurname());
@@ -33,6 +32,19 @@ public class EmployeeMapper {
     dto.setPositionId(employee.getPositionId());
     dto.setBirth(employee.getBirth());
     return dto;
+  }
+
+  public Employee toEmployee(
+      int id, EmployeePutDto employeePutDTO, int departmentId, int positionId) {
+    Employee employee = new Employee();
+    employee.setId(id);
+    employee.setName(employeePutDTO.getName());
+    employee.setSurname(employeePutDTO.getSurname());
+    employee.setEmail(employeePutDTO.getEmail());
+    employee.setDepartmentId(departmentId);
+    employee.setPositionId(positionId);
+    employee.setBirth(employeePutDTO.getBirth());
+    return employee;
   }
 
   // Getting only employee
@@ -48,18 +60,4 @@ public class EmployeeMapper {
     employeeResponseDTO.setBirth(employee.getBirth());
     return employeeResponseDTO;
   }*/
-
-  // Used to update an employee
-  public Employee toEmployee(
-      int id, EmployeePutDTO employeePutDTO, int departmentId, int positionId) {
-    Employee employee = new Employee();
-    employee.setId(id);
-    employee.setName(employeePutDTO.getName());
-    employee.setSurname(employeePutDTO.getSurname());
-    employee.setEmail(employeePutDTO.getEmail());
-    employee.setDepartmentId(departmentId);
-    employee.setPositionId(positionId);
-    employee.setBirth(employeePutDTO.getBirth());
-    return employee;
-  }
 }

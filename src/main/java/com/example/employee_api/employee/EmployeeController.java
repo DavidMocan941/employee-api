@@ -1,8 +1,8 @@
 package com.example.employee_api.employee;
 
-import com.example.employee_api.employee.dto.EmployeeCreateDTO;
-import com.example.employee_api.employee.dto.EmployeePutDTO;
-import com.example.employee_api.employee.dto.EmployeeResponseDTO;
+import com.example.employee_api.employee.dto.EmployeeCreateDto;
+import com.example.employee_api.employee.dto.EmployeePutDto;
+import com.example.employee_api.employee.dto.EmployeeResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ EmployeeController {
     private final EmployeeService employeeService;
 
     @PostMapping("/create")
-    public ResponseEntity<Map<String, Object>> createEmployee(@Valid @RequestBody EmployeeCreateDTO employeeCreateDTO,
+    public ResponseEntity<Map<String, Object>> createEmployee(@Valid @RequestBody EmployeeCreateDto employeeCreateDTO,
                                                               BindingResult bindingResult) {
         Map<String, Object> map = new HashMap<>();
         if (bindingResult.hasErrors()) {
@@ -34,7 +34,7 @@ EmployeeController {
             map.put("Cause : ", errors);
             return ResponseEntity.badRequest().body(map);
         }
-        EmployeeResponseDTO response = employeeService.addEmployeeAndSalary(employeeCreateDTO);
+        EmployeeResponseDto response = employeeService.addEmployeeAndSalary(employeeCreateDTO);
         map.put("Message :", "A new employee added");
         map.put("Employee", response);
         return ResponseEntity.status(HttpStatus.CREATED).body(map);
@@ -42,7 +42,7 @@ EmployeeController {
 
     @PutMapping("/update/{id}")
     public ResponseEntity<Map<String, Object>> updateEmployee(@PathVariable int id,
-                                                              @Valid @RequestBody EmployeePutDTO employeePutDTO,
+                                                              @Valid @RequestBody EmployeePutDto employeePutDTO,
                                                               BindingResult bindingResult) {
         Map<String, Object> result = new HashMap<>();
         if (bindingResult.hasErrors()) {
@@ -54,24 +54,24 @@ EmployeeController {
             result.put("Message", errors);
             return ResponseEntity.badRequest().body(result);
         }
-        EmployeeResponseDTO response = employeeService.updateEmployee(id, employeePutDTO);
+        EmployeeResponseDto response = employeeService.updateEmployee(id, employeePutDTO);
         result.put("Result", "Successfully updated employee");
         result.put("Message", response);
         return ResponseEntity.ok().body(result);
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<Map<String, EmployeeResponseDTO>> getEmployeeById(@PathVariable int id) {
-        Map<String, EmployeeResponseDTO> map = new HashMap<>();
-        EmployeeResponseDTO response = employeeService.getEmployee(id);
+    public ResponseEntity<Map<String, EmployeeResponseDto>> getEmployeeById(@PathVariable int id) {
+        Map<String, EmployeeResponseDto> map = new HashMap<>();
+        EmployeeResponseDto response = employeeService.getEmployee(id);
         map.put("Response", response);
         return ResponseEntity.ok().body(map);
     }
 
     @GetMapping("/getAll")
-    public ResponseEntity<Map<String, List<EmployeeResponseDTO>>> getEmployees() {
-        Map<String, List<EmployeeResponseDTO>> map = new HashMap<>();
-        List<EmployeeResponseDTO> list = employeeService.getAllEmployees();
+    public ResponseEntity<Map<String, List<EmployeeResponseDto>>> getEmployees() {
+        Map<String, List<EmployeeResponseDto>> map = new HashMap<>();
+        List<EmployeeResponseDto> list = employeeService.getAllEmployees();
         map.put("Response", list);
         return ResponseEntity.ok().body(map);
     }

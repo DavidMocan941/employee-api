@@ -4,14 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Setter
 @Getter
 @ToString
-public class EmployeeResponseDTO {
+public class EmployeeResponseDto {
     private int id;
     private String name;
     private String surname;

@@ -1,7 +1,7 @@
 package com.example.employee_api.analytics.service;
 
 import com.example.employee_api.employee.EmployeeRepository;
-import com.example.employee_api.employee.dto.EmployeeResponseDTO;
+import com.example.employee_api.employee.dto.EmployeeResponseDto;
 import com.example.employee_api.employee.mapper.EmployeeMapper;
 import com.example.employee_api.employee.model.Employee;
 import com.example.employee_api.salary.SalaryRepository;
@@ -23,7 +23,7 @@ public class SalaryAnalyticsService {
     private final SalaryRepository salaryRepository;
     private final SalaryMapper salaryMapper;
 
-    public List<EmployeeResponseDTO> findEmployeesWithSalaryIncreaseThisYear() {
+    public List<EmployeeResponseDto> findEmployeesWithSalaryIncreaseThisYear() {
         List<Employee> employees = employeeRepository.getEmployeeWithSalaryIncreaseThisYear();
         return !employees.isEmpty() ? employees.
                 stream().
@@ -31,7 +31,7 @@ public class SalaryAnalyticsService {
                 toList() : Collections.emptyList();
     }
 
-    public List<EmployeeResponseDTO> findEmployeesWithSalaryDecrease() {
+    public List<EmployeeResponseDto> findEmployeesWithSalaryDecrease() {
         List<Employee> employees = employeeRepository.getEmployeeWithSalaryDecrease();
         return !employees.isEmpty() ? employees.
                 stream().

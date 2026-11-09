@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 @Setter
 @Getter
-public class TopPaidEmployeeResponseDTO {
+public class TopPaidEmployeeResponseDto {
     private int id;
     private String name;
     private String surname;

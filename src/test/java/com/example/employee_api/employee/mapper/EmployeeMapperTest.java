@@ -3,8 +3,9 @@ package com.example.employee_api.employee.mapper;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.example.employee_api.employee.dto.EmployeeCreateDTO;
-import com.example.employee_api.employee.dto.EmployeeResponseDTO;
+import com.example.employee_api.employee.dto.EmployeeCreateDto;
+import com.example.employee_api.employee.dto.EmployeePutDto;
+import com.example.employee_api.employee.dto.EmployeeResponseDto;
 import com.example.employee_api.employee.model.Employee;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,7 +20,7 @@ public class EmployeeMapperTest {
   public void toEmployee_everyFieldIsMapped_returnsAMappedEmployee() {
     int positionId = 1;
     int departmentId = 1;
-    EmployeeCreateDTO employeeCreateDTO = new EmployeeCreateDTO();
+    EmployeeCreateDto employeeCreateDTO = new EmployeeCreateDto();
     employeeCreateDTO.setName("David");
     employeeCreateDTO.setSurname("Mocan");
     employeeCreateDTO.setEmail("davidmocan34@gmail.com");
@@ -47,7 +48,7 @@ public class EmployeeMapperTest {
     employee.setPositionId(1);
     employee.setBirth(LocalDate.of(2006, 3, 21));
 
-    EmployeeResponseDTO dto = employeeMapper.toEmployeeResponseDTO(employee);
+    EmployeeResponseDto dto = employeeMapper.toEmployeeResponseDTO(employee);
 
     assertAll(
         () -> assertEquals(employee.getId(), dto.getId()),
@@ -58,5 +59,27 @@ public class EmployeeMapperTest {
         () -> assertEquals(employee.getDepartmentId(), dto.getDepartmentId()),
         () -> assertEquals(employee.getPositionId(), dto.getPositionId()),
         () -> assertEquals(employee.getBirth(), dto.getBirth()));
+  }
+
+  @Test
+  public void toEmployeeWhenUpdating_everyFieldIsMapped_returnsAMappedEmployee() {
+    int id = 1;
+    int positionId = 1;
+    int departmentId = 1;
+    EmployeePutDto dto = new EmployeePutDto();
+    dto.setName("David");
+    dto.setSurname("Mocan");
+    dto.setEmail("davidmocan34@gmail.com");
+    dto.setBirth(LocalDate.of(2006, 3, 21));
+
+    Employee employee = employeeMapper.toEmployee(id, dto, departmentId, positionId);
+    assertAll(
+        () -> assertEquals(id, employee.getId()),
+        () -> assertEquals(dto.getName(), employee.getName()),
+        () -> assertEquals(dto.getSurname(), employee.getSurname()),
+        () -> assertEquals(dto.getEmail(), employee.getEmail()),
+        () -> assertEquals(dto.getBirth(), employee.getBirth()),
+        () -> assertEquals(positionId, employee.getPositionId()),
+        () -> assertEquals(departmentId, employee.getDepartmentId()));
   }
 }

@@ -6,15 +6,13 @@ import com.example.employee_api.department.dto.DepartmentSalaryBudgetDTO;
 import com.example.employee_api.department.mapper.DepartmentMapper;
 import com.example.employee_api.department.model.Department;
 import com.example.employee_api.employee.EmployeeRepository;
-import com.example.employee_api.employee.dto.TopPaidEmployeeResponseDTO;
+import com.example.employee_api.employee.dto.TopPaidEmployeeResponseDto;
 import com.example.employee_api.salary.SalaryRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -49,7 +47,7 @@ public class CompanyAnalyticsService {
         return salaryBudget;
     }
 
-    public List<TopPaidEmployeeResponseDTO> findCompanyTopPaidEmployees() {
+    public List<TopPaidEmployeeResponseDto> findCompanyTopPaidEmployees() {
         return employeeRepository.getCompanyTopPaidEmployees();
     }
 

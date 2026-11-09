@@ -7,8 +7,8 @@ import static org.mockito.Mockito.*;
 import com.example.employee_api.common.exceptions.DepartmentNotFoundException;
 import com.example.employee_api.common.exceptions.PositionNotFoundException;
 import com.example.employee_api.department.DepartmentRepository;
-import com.example.employee_api.employee.dto.EmployeeCreateDTO;
-import com.example.employee_api.employee.dto.EmployeeResponseDTO;
+import com.example.employee_api.employee.dto.EmployeeCreateDto;
+import com.example.employee_api.employee.dto.EmployeeResponseDto;
 import com.example.employee_api.employee.mapper.EmployeeMapper;
 import com.example.employee_api.employee.model.Employee;
 import com.example.employee_api.position.PositionRepository;
@@ -44,7 +44,7 @@ public class EmployeeServiceTest {
       String department = "IT", position = "Backend Developer";
       int departmentId = 1, positionId = 2;
 
-      EmployeeCreateDTO dto = new EmployeeCreateDTO();
+      EmployeeCreateDto dto = new EmployeeCreateDto();
       dto.setDepartmentName(department);
       dto.setPositionName(position);
 
@@ -54,7 +54,7 @@ public class EmployeeServiceTest {
       int employeeKey = 1;
       Salary salary = new Salary();
       int salaryKey = 1;
-      EmployeeResponseDTO employeeResponseDTO = new EmployeeResponseDTO();
+      EmployeeResponseDto employeeResponseDTO = new EmployeeResponseDto();
       when(departmentRepository.findIdByDepartment(department))
           .thenReturn(Optional.of(departmentId));
       when(positionRepository.findIdByPosition(position)).thenReturn(Optional.of(positionId));
@@ -64,7 +64,7 @@ public class EmployeeServiceTest {
       when(salaryRepository.insertSalary(salary)).thenReturn(salaryKey);
       when(employeeMapper.toEmployeeResponseDTO(employee)).thenReturn(employeeResponseDTO);
 
-      EmployeeResponseDTO responseDTO = employeeService.addEmployeeAndSalary(dto);
+      EmployeeResponseDto responseDTO = employeeService.addEmployeeAndSalary(dto);
       assertSame(employeeResponseDTO, responseDTO);
 
       InOrder inOrder =
@@ -90,7 +90,7 @@ public class EmployeeServiceTest {
     @Test
     void addEmployeeAndSalary_departmentIsNotFound_nothingExecutesAfterException() {
       String department = "IT";
-      EmployeeCreateDTO dto = new EmployeeCreateDTO();
+      EmployeeCreateDto dto = new EmployeeCreateDto();
       dto.setDepartmentName(department);
       when(departmentRepository.findIdByDepartment(department)).thenReturn(Optional.empty());
 
@@ -106,7 +106,7 @@ public class EmployeeServiceTest {
     void addEmployeeAndSalary_positionIsNotFound_nothingExecutesAfterException() {
       String department = "IT";
       String position = "Backend Developer";
-      EmployeeCreateDTO dto = new EmployeeCreateDTO();
+      EmployeeCreateDto dto = new EmployeeCreateDto();
       dto.setDepartmentName(department);
       dto.setPositionName(position);
       when(departmentRepository.findIdByDepartment(department)).thenReturn(Optional.of(1));
@@ -120,4 +120,7 @@ public class EmployeeServiceTest {
       verifyNoMoreInteractions(employeeMapper, employeeRepository, salaryMapper, salaryRepository);
     }
   }
+
+  @Nested
+  class UpdateEmployee {}
 }
