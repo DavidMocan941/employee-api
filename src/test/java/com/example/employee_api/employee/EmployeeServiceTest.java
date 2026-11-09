@@ -62,7 +62,7 @@ public class EmployeeServiceTest {
       when(employeeRepository.insertEmployee(employee)).thenReturn(employeeKey);
       when(salaryMapper.toSalary(dto, employeeKey)).thenReturn(salary);
       when(salaryRepository.insertSalary(salary)).thenReturn(salaryKey);
-      when(employeeMapper.toEmployeeResponseDTO(employee, salary)).thenReturn(employeeResponseDTO);
+      when(employeeMapper.toEmployeeResponseDTO(employee)).thenReturn(employeeResponseDTO);
 
       EmployeeResponseDTO responseDTO = employeeService.addEmployeeAndSalary(dto);
       assertSame(employeeResponseDTO, responseDTO);
@@ -84,7 +84,7 @@ public class EmployeeServiceTest {
       inOrder.verify(employeeRepository).insertEmployee(employee);
       inOrder.verify(salaryMapper).toSalary(dto, employeeKey);
       inOrder.verify(salaryRepository).insertSalary(salary);
-      inOrder.verify(employeeMapper).toEmployeeResponseDTO(employee, salary);
+      inOrder.verify(employeeMapper).toEmployeeResponseDTO(employee);
     }
 
     @Test

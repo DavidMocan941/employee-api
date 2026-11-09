@@ -54,7 +54,7 @@ EmployeeController {
             result.put("Message", errors);
             return ResponseEntity.badRequest().body(result);
         }
-        EmployeeResponseDTO response = employeeService.getUpdatedEmployee(id, employeePutDTO);
+        EmployeeResponseDTO response = employeeService.updateEmployee(id, employeePutDTO);
         result.put("Result", "Successfully updated employee");
         result.put("Message", response);
         return ResponseEntity.ok().body(result);

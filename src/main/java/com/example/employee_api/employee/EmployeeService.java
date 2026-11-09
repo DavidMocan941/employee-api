@@ -34,7 +34,6 @@ public class EmployeeService {
   private final SalaryMapper salaryMapper;
   private final EmployeeCreationValidator employeeCreationValidator;
 
-
   @Transactional
   public EmployeeResponseDTO addEmployeeAndSalary(EmployeeCreateDTO employeeCreateDTO) {
 
@@ -49,18 +48,10 @@ public class EmployeeService {
     Salary salary = salaryMapper.toSalary(employeeCreateDTO, employeeKey);
     salaryRepository.insertSalary(salary);
 
-    return employeeMapper.toEmployeeResponseDTO(employee, salary);
+    return employeeMapper.toEmployeeResponseDTO(employee);
   }
 
-  public static int computeTheSumOfColsWhereRowIsK(int[][] array, int k) {
-    int sum = 0;
-    for (int i = 0; i < array[k].length; i++) {
-      sum += array[k][i];
-    }
-    return sum;
-  }
-
-  public EmployeeResponseDTO getUpdatedEmployee(int id, EmployeePutDTO employeePutDTO) {
+  public EmployeeResponseDTO updateEmployee(int id, EmployeePutDTO employeePutDTO) {
     log.info("Checking if employee exists with id: {}", id);
     boolean empExists = employeeRepository.checkIfEmployeeExists(id);
     if (!empExists) {

@@ -10,19 +10,19 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class Employee {
-    private int id;
-    private String name;
-    private String surname;
-    private String email;
-    private LocalDateTime hireDate;
-    private int departmentId;
-    private int positionId;
-    private LocalDate birth;
-    private int createdBy;
-    private LocalDateTime createdAt;
-    private boolean isActive;
-    private int updatedBy;
-    private LocalDateTime updatedAt;
-    private int deletedBy;
-    private LocalDateTime deletedAt;
+  private int id;
+  private String name;
+  private String surname;
+  private String email;
+  private LocalDateTime hireDate;
+  private int departmentId;
+  private int positionId;
+  private LocalDate birth;
+  private int createdBy;
+  private LocalDateTime createdAt;
+  private boolean isActive;
+  private int updatedBy;
+  private LocalDateTime updatedAt;
+  private int deletedBy;
+  private LocalDateTime deletedAt;
 }
