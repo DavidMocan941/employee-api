@@ -63,7 +63,7 @@ EmployeeController {
     @GetMapping("/get/{id}")
     public ResponseEntity<Map<String, EmployeeResponseDto>> getEmployeeById(@PathVariable int id) {
         Map<String, EmployeeResponseDto> map = new HashMap<>();
-        EmployeeResponseDto response = employeeService.getEmployee(id);
+        EmployeeResponseDto response = employeeService.fetchEmployee(id);
         map.put("Response", response);
         return ResponseEntity.ok().body(map);
     }

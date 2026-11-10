@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.example.employee_api.common.exceptions.DepartmentNotFoundException;
+import com.example.employee_api.common.exceptions.EmployeeNotFoundException;
 import com.example.employee_api.common.exceptions.PositionNotFoundException;
 import com.example.employee_api.department.DepartmentRepository;
 import com.example.employee_api.employee.dto.EmployeeCreateDto;
@@ -195,6 +196,34 @@ public class EmployeeServiceTest {
       verify(employeeMapper, never()).toEmployee(anyByte(), any(), anyByte(), anyByte());
       verify(employeeRepository, never()).updateEmployee(any());
       verify(employeeMapper, never()).toEmployeeResponseDto(any());
+    }
+  }
+
+  @Nested
+  class FetchEmployee {
+    @Test
+    void fetchEmployee_employeeExists_employeeFetchedSuccessfully() {
+      Employee employee = new Employee();
+      EmployeeResponseDto expectedResponseDto = new EmployeeResponseDto();
+
+      when(employeeRepository.findEmployee(1)).thenReturn(employee);
+      when(employeeMapper.toEmployeeResponseDto(employee)).thenReturn(expectedResponseDto);
+
+      EmployeeResponseDto actualResponseDto = employeeService.fetchEmployee(1);
+      assertEquals(expectedResponseDto, actualResponseDto);
+
+      verify(employeeRepository).findEmployee(1);
+      verify(employeeMapper).toEmployeeResponseDto(employee);
+    }
+
+    @Test
+    void fetchEmployee_employeeDoesNotExist_throwEmployeeNotFoundException() {
+      when(employeeRepository.findEmployee(1)).thenThrow(new EmployeeNotFoundException(1));
+
+      assertThrows(EmployeeNotFoundException.class, () -> employeeService.fetchEmployee(1));
+
+      verify(employeeRepository).findEmployee(1);
+      verify(employeeMapper, never()).toEmployeeResponseDto(any(Employee.class));
     }
   }
 }

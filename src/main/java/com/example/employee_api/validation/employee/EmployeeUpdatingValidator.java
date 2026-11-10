@@ -20,7 +20,7 @@ public class EmployeeUpdatingValidator implements Validator<EmployeeUpdateContex
 
   @Override
   public void validate(EmployeeUpdateContext context) {
-    existingEmployeeRule.checkIfEmployeeExists(context);
+    existingEmployeeRule.checkIfEmployeeExists(context.id());
     existingEmailRule.checkIfEmailPresent(context);
   }
 }

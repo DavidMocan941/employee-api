@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class EmployeeCreationValidator implements Validator<EmployeeCreateDto> {
   private final DateRangeRule dateRangeRule;
-  private final ExistingEmailRule existingEmailRule;
+  private final ExistingEmailRule<EmployeeCreateDto> existingEmailRule;
 
   @Override
   public void validate(EmployeeCreateDto employeeCreateDTO) {

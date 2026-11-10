@@ -24,42 +24,40 @@ public class EmployeeUpdatingValidatorTest {
 
   @Test
   public void validate_checkIfEmployeeExistsThrowsException_everythingElseIsNotExecuted() {
-    EmployeeUpdateContext context = new EmployeeUpdateContext(0, null);
+    EmployeeUpdateContext context = new EmployeeUpdateContext(1, null);
 
-    doThrow(new EmployeeNotFoundException(0))
-        .when(existingEmployeeRule)
-        .checkIfEmployeeExists(context);
+    doThrow(new EmployeeNotFoundException(0)).when(existingEmployeeRule).checkIfEmployeeExists(1);
 
     assertThrows(EmployeeNotFoundException.class, () -> validator.validate(context));
 
-    verify(existingEmployeeRule).checkIfEmployeeExists(context);
+    verify(existingEmployeeRule).checkIfEmployeeExists(1);
     verify(existingEmailRule, never()).checkIfEmailPresent(context);
   }
 
   @Test
   public void validate_checkIfEmailPresentThrowsException_validationDoesNotPass() {
-    EmployeeUpdateContext context = new EmployeeUpdateContext(0, null);
+    EmployeeUpdateContext context = new EmployeeUpdateContext(1, null);
 
     doThrow(new EmailAlreadyExistException(null))
         .when(existingEmailRule)
         .checkIfEmailPresent(context);
 
     assertThrows(EmailAlreadyExistException.class, () -> validator.validate(context));
-    InOrder inOrder = inOrder(existingEmployeeRule, existingEmailRule);
 
-    inOrder.verify(existingEmployeeRule).checkIfEmployeeExists(context);
+    InOrder inOrder = inOrder(existingEmployeeRule, existingEmailRule);
+    inOrder.verify(existingEmployeeRule).checkIfEmployeeExists(1);
     inOrder.verify(existingEmailRule).checkIfEmailPresent(context);
   }
 
   @Test
   public void validate_noExceptionIsThrown_validationPasses() {
-    EmployeeUpdateContext context = new EmployeeUpdateContext(0, null);
+    EmployeeUpdateContext context = new EmployeeUpdateContext(1, null);
 
     assertDoesNotThrow(() -> validator.validate(context));
 
     InOrder inOrder = inOrder(existingEmployeeRule, existingEmailRule);
 
-    inOrder.verify(existingEmployeeRule).checkIfEmployeeExists(context);
+    inOrder.verify(existingEmployeeRule).checkIfEmployeeExists(1);
     inOrder.verify(existingEmailRule).checkIfEmailPresent(context);
   }
 }

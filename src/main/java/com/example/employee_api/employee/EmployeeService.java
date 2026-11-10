@@ -24,7 +24,6 @@ import java.util.List;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class EmployeeService {
   private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
@@ -34,6 +33,25 @@ public class EmployeeService {
   private final SalaryMapper salaryMapper;
   private final EmployeeCreationValidator employeeCreationValidator;
   private final EmployeeUpdatingValidator employeeUpdatingValidator;
+
+  public EmployeeService(
+      DepartmentRepository departmentRepository,
+      EmployeeRepository employeeRepository,
+      SalaryRepository salaryRepository,
+      PositionRepository positionRepository,
+      EmployeeMapper employeeMapper,
+      SalaryMapper salaryMapper,
+      EmployeeCreationValidator employeeCreationValidator,
+      EmployeeUpdatingValidator employeeUpdatingValidator) {
+    this.departmentRepository = departmentRepository;
+    this.employeeRepository = employeeRepository;
+    this.salaryRepository = salaryRepository;
+    this.positionRepository = positionRepository;
+    this.employeeMapper = employeeMapper;
+    this.salaryMapper = salaryMapper;
+    this.employeeCreationValidator = employeeCreationValidator;
+    this.employeeUpdatingValidator = employeeUpdatingValidator;
+  }
 
   @Transactional
   public EmployeeResponseDto addEmployeeAndSalary(EmployeeCreateDto employeeCreateDTO) {
@@ -66,14 +84,9 @@ public class EmployeeService {
     return employeeMapper.toEmployeeResponseDto(employee);
   }
 
-  public EmployeeResponseDto getEmployee(int id) {
-    boolean exists = employeeRepository.checkIfEmployeeExists(id);
-    if (!exists) {
-      throw new EmployeeNotFoundException(id);
-    }
+  public EmployeeResponseDto fetchEmployee(int id) {
     Employee employee = employeeRepository.findEmployee(id);
-    EmployeeResponseDto responseDTO = employeeMapper.toEmployeeResponseDto(employee);
-    return responseDTO;
+    return employeeMapper.toEmployeeResponseDto(employee);
   }
 
   public List<EmployeeResponseDto> getAllEmployees() {
@@ -94,7 +107,7 @@ public class EmployeeService {
       }
     } else throw new EmployeeNotFoundException(id);
     Employee employee = new Employee();
-    //auditService.setAuditFieldsWhenDelete(employee);
+    // auditService.setAuditFieldsWhenDelete(employee);
     employee.setActive(false);
     employeeRepository.deleteEmployeeById(id, employee);
   }

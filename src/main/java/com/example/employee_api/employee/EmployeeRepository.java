@@ -1,10 +1,12 @@
 package com.example.employee_api.employee;
 
+import com.example.employee_api.common.exceptions.EmployeeNotFoundException;
 import com.example.employee_api.department.dto.DepartmentResponseDTO;
 import com.example.employee_api.employee.dto.TopPaidEmployeeResponseDto;
 import com.example.employee_api.employee.model.Employee;
 import com.example.employee_api.employee.model.SalaryDistribution;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
@@ -77,7 +79,11 @@ public class EmployeeRepository {
     String sql =
         "select id,name,surname,email,hire_date,department_id,position_id,birth from employees where id =?;";
     RowMapper<Employee> rowMapper = (rs, rowNum) -> getEmployeeResponseDTO(rs);
-    return jdbcTemplate.queryForObject(sql, rowMapper, id);
+    try {
+      return jdbcTemplate.queryForObject(sql, rowMapper, id);
+    } catch (EmptyResultDataAccessException e) {
+      throw new EmployeeNotFoundException(id);
+    }
   }
 
   private static Employee getEmployeeResponseDTO(ResultSet rs) throws SQLException {

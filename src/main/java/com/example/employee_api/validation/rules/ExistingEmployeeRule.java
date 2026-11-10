@@ -13,10 +13,10 @@ public class ExistingEmployeeRule {
     this.repository = repository;
   }
 
-  public void checkIfEmployeeExists(EmployeeUpdateContext context) {
-    boolean empExists = repository.checkIfEmployeeExists(context.id());
+  public void checkIfEmployeeExists(int id) {
+    boolean empExists = repository.checkIfEmployeeExists(id);
     if (!empExists) {
-      throw new EmployeeNotFoundException(context.id());
+      throw new EmployeeNotFoundException(id);
     }
   }
 }

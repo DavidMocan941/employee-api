@@ -25,7 +25,7 @@ public class ExistingEmployeeRuleTest {
     EmployeeUpdateContext context = new EmployeeUpdateContext(1, null);
     when(repository.checkIfEmployeeExists(1)).thenReturn(false);
 
-    assertThrows(EmployeeNotFoundException.class, () -> rule.checkIfEmployeeExists(context));
+    assertThrows(EmployeeNotFoundException.class, () -> rule.checkIfEmployeeExists(context.id()));
 
     verify(repository).checkIfEmployeeExists(1);
   }
@@ -35,7 +35,7 @@ public class ExistingEmployeeRuleTest {
     EmployeeUpdateContext context = new EmployeeUpdateContext(1, null);
     when(repository.checkIfEmployeeExists(1)).thenReturn(true);
 
-    assertDoesNotThrow(() -> rule.checkIfEmployeeExists(context));
+    assertDoesNotThrow(() -> rule.checkIfEmployeeExists(context.id()));
 
     verify(repository).checkIfEmployeeExists(1);
   }
