@@ -48,7 +48,7 @@ public class EmployeeMapperTest {
     employee.setPositionId(1);
     employee.setBirth(LocalDate.of(2006, 3, 21));
 
-    EmployeeResponseDto dto = employeeMapper.toEmployeeResponseDTO(employee);
+    EmployeeResponseDto dto = employeeMapper.toEmployeeResponseDto(employee);
 
     assertAll(
         () -> assertEquals(employee.getId(), dto.getId()),

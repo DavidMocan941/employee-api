@@ -1,6 +1,5 @@
 package com.example.employee_api.employee;
 
-import com.example.employee_api.common.audit.EmployeeAuditService;
 import com.example.employee_api.common.exceptions.*;
 import com.example.employee_api.department.DepartmentRepository;
 import com.example.employee_api.employee.dto.EmployeeCreateDto;
@@ -32,7 +31,6 @@ public class EmployeeService {
   private final SalaryRepository salaryRepository;
   private final PositionRepository positionRepository;
   private final EmployeeMapper employeeMapper;
-  private final EmployeeAuditService auditService;
   private final SalaryMapper salaryMapper;
   private final EmployeeCreationValidator employeeCreationValidator;
   private final EmployeeUpdatingValidator employeeUpdatingValidator;
@@ -51,25 +49,21 @@ public class EmployeeService {
     Salary salary = salaryMapper.toSalary(employeeCreateDTO, employeeKey);
     salaryRepository.insertSalary(salary);
 
-    return employeeMapper.toEmployeeResponseDTO(employee);
+    return employeeMapper.toEmployeeResponseDto(employee);
   }
 
   public EmployeeResponseDto updateEmployee(int id, EmployeePutDto dto) {
-    // todo 1)create tests for validator
 
     employeeUpdatingValidator.validate(new EmployeeUpdateContext(id, dto));
+
     int departmentId = departmentResolver(dto.getDepartmentName());
     int positionId = positionResolver(dto.getPositionName());
-    // todo 2)create tests for this mapper
+
     Employee employee = employeeMapper.toEmployee(id, dto, departmentId, positionId);
 
-    // auditService.setAuditFieldsWhenUpdate(employee);
+    employeeRepository.updateEmployee(employee);
 
-    // todo 2)fullyUpdateEmployeeById must return the updated employee
-    employeeRepository.fullyUpdateEmployeeById(employee);
-    Employee responseEmployee = employeeRepository.findEmployee(id);
-
-    return employeeMapper.toEmployeeResponseDTO(responseEmployee);
+    return employeeMapper.toEmployeeResponseDto(employee);
   }
 
   public EmployeeResponseDto getEmployee(int id) {
@@ -78,7 +72,7 @@ public class EmployeeService {
       throw new EmployeeNotFoundException(id);
     }
     Employee employee = employeeRepository.findEmployee(id);
-    EmployeeResponseDto responseDTO = employeeMapper.toEmployeeResponseDTO(employee);
+    EmployeeResponseDto responseDTO = employeeMapper.toEmployeeResponseDto(employee);
     return responseDTO;
   }
 
@@ -86,7 +80,7 @@ public class EmployeeService {
     List<EmployeeResponseDto> response =
         employeeRepository.findAllEmployees().stream()
             .sorted(Comparator.comparing(Employee::getId).reversed())
-            .map(employeeMapper::toEmployeeResponseDTO)
+            .map(employeeMapper::toEmployeeResponseDto)
             .toList();
     return response;
   }
@@ -100,7 +94,7 @@ public class EmployeeService {
       }
     } else throw new EmployeeNotFoundException(id);
     Employee employee = new Employee();
-    auditService.setAuditFieldsWhenDelete(employee);
+    //auditService.setAuditFieldsWhenDelete(employee);
     employee.setActive(false);
     employeeRepository.deleteEmployeeById(id, employee);
   }

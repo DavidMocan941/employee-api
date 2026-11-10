@@ -1,13 +1,13 @@
 package com.example.employee_api.employee;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.example.employee_api.common.exceptions.DepartmentNotFoundException;
 import com.example.employee_api.common.exceptions.PositionNotFoundException;
 import com.example.employee_api.department.DepartmentRepository;
 import com.example.employee_api.employee.dto.EmployeeCreateDto;
+import com.example.employee_api.employee.dto.EmployeePutDto;
 import com.example.employee_api.employee.dto.EmployeeResponseDto;
 import com.example.employee_api.employee.mapper.EmployeeMapper;
 import com.example.employee_api.employee.model.Employee;
@@ -15,8 +15,11 @@ import com.example.employee_api.position.PositionRepository;
 import com.example.employee_api.salary.SalaryRepository;
 import com.example.employee_api.salary.mapper.SalaryMapper;
 import com.example.employee_api.salary.model.Salary;
+import com.example.employee_api.validation.context.EmployeeUpdateContext;
 import com.example.employee_api.validation.employee.EmployeeCreationValidator;
 import java.util.Optional;
+
+import com.example.employee_api.validation.employee.EmployeeUpdatingValidator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +38,7 @@ public class EmployeeServiceTest {
   @Mock private SalaryMapper salaryMapper;
   @Mock private SalaryRepository salaryRepository;
   @Mock private EmployeeCreationValidator validator;
+  @Mock private EmployeeUpdatingValidator employeeUpdatingValidator;
   @InjectMocks private EmployeeService employeeService;
 
   @Nested
@@ -62,7 +66,7 @@ public class EmployeeServiceTest {
       when(employeeRepository.insertEmployee(employee)).thenReturn(employeeKey);
       when(salaryMapper.toSalary(dto, employeeKey)).thenReturn(salary);
       when(salaryRepository.insertSalary(salary)).thenReturn(salaryKey);
-      when(employeeMapper.toEmployeeResponseDTO(employee)).thenReturn(employeeResponseDTO);
+      when(employeeMapper.toEmployeeResponseDto(employee)).thenReturn(employeeResponseDTO);
 
       EmployeeResponseDto responseDTO = employeeService.addEmployeeAndSalary(dto);
       assertSame(employeeResponseDTO, responseDTO);
@@ -84,7 +88,7 @@ public class EmployeeServiceTest {
       inOrder.verify(employeeRepository).insertEmployee(employee);
       inOrder.verify(salaryMapper).toSalary(dto, employeeKey);
       inOrder.verify(salaryRepository).insertSalary(salary);
-      inOrder.verify(employeeMapper).toEmployeeResponseDTO(employee);
+      inOrder.verify(employeeMapper).toEmployeeResponseDto(employee);
     }
 
     @Test
@@ -122,5 +126,75 @@ public class EmployeeServiceTest {
   }
 
   @Nested
-  class UpdateEmployee {}
+  class UpdateEmployee {
+    @Test
+    void updateEmployee_everythingValid_updateEmployee() {
+      EmployeePutDto dto = new EmployeePutDto();
+      dto.setDepartmentName("IT");
+      dto.setPositionName("Software Developer");
+      Employee employee = new Employee();
+      EmployeeResponseDto employeeResponseDto = new EmployeeResponseDto();
+
+      when(departmentRepository.findIdByDepartment("IT")).thenReturn(Optional.of(1));
+      when(positionRepository.findIdByPosition("Software Developer")).thenReturn(Optional.of(1));
+      when(employeeMapper.toEmployee(1, dto, 1, 1)).thenReturn(employee);
+      when(employeeMapper.toEmployeeResponseDto(employee)).thenReturn(employeeResponseDto);
+      EmployeeResponseDto responseDto = employeeService.updateEmployee(1, dto);
+
+      assertEquals(employeeResponseDto, responseDto);
+
+      InOrder inOrder =
+          inOrder(
+              employeeUpdatingValidator,
+              departmentRepository,
+              positionRepository,
+              employeeMapper,
+              employeeRepository);
+
+      inOrder.verify(employeeUpdatingValidator).validate(any());
+      inOrder.verify(departmentRepository).findIdByDepartment("IT");
+      inOrder.verify(positionRepository).findIdByPosition("Software Developer");
+      inOrder.verify(employeeMapper).toEmployee(1, dto, 1, 1);
+      inOrder.verify(employeeRepository).updateEmployee(employee);
+      inOrder.verify(employeeMapper).toEmployeeResponseDto(employee);
+    }
+
+    @Test
+    void updateEmployee_throwsDepartmentNotFoundException_nothingElseIsExecuted() {
+      EmployeePutDto dto = new EmployeePutDto();
+      dto.setDepartmentName("IT");
+      dto.setPositionName("Software Developer");
+
+      when(departmentRepository.findIdByDepartment("IT")).thenReturn(Optional.empty());
+
+      assertThrows(DepartmentNotFoundException.class, () -> employeeService.updateEmployee(1, dto));
+      InOrder inOrder = inOrder(employeeUpdatingValidator, departmentRepository);
+      inOrder.verify(employeeUpdatingValidator).validate(any());
+      inOrder.verify(departmentRepository).findIdByDepartment("IT");
+      verify(positionRepository, never()).findIdByPosition(any());
+      verify(employeeMapper, never()).toEmployee(anyByte(), any(), anyByte(), anyByte());
+      verify(employeeRepository, never()).updateEmployee(any());
+      verify(employeeMapper, never()).toEmployeeResponseDto(any());
+    }
+
+    @Test
+    void updateEmployee_throwsPositionNotFoundException_nothingElseIsExecuted() {
+      EmployeePutDto dto = new EmployeePutDto();
+      dto.setDepartmentName("IT");
+      dto.setPositionName("Software Developer");
+
+      when(departmentRepository.findIdByDepartment("IT")).thenReturn(Optional.of(1));
+      when(positionRepository.findIdByPosition("Software Developer")).thenReturn(Optional.empty());
+
+      assertThrows(PositionNotFoundException.class, () -> employeeService.updateEmployee(1, dto));
+      InOrder inOrder =
+          inOrder(employeeUpdatingValidator, departmentRepository, positionRepository);
+      inOrder.verify(employeeUpdatingValidator).validate(any());
+      inOrder.verify(departmentRepository).findIdByDepartment(anyString());
+      inOrder.verify(positionRepository).findIdByPosition("Software Developer");
+      verify(employeeMapper, never()).toEmployee(anyByte(), any(), anyByte(), anyByte());
+      verify(employeeRepository, never()).updateEmployee(any());
+      verify(employeeMapper, never()).toEmployeeResponseDto(any());
+    }
+  }
 }

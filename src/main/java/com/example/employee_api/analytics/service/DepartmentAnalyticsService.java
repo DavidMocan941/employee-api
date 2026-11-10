@@ -1,6 +1,5 @@
 package com.example.employee_api.analytics.service;
 
-import com.example.employee_api.common.EntityValidator;
 import com.example.employee_api.common.exceptions.DepartmentNotFoundException;
 import com.example.employee_api.department.DepartmentRepository;
 import com.example.employee_api.employee.EmployeeRepository;
@@ -24,7 +23,6 @@ public class DepartmentAnalyticsService {
     private final SalaryRepository salaryRepository;
     private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
-    private final EntityValidator entityValidator;
     private final EmployeeMapper employeeMapper;
 
     public BigDecimal findAvgSalaryForDepartment(int id) {
@@ -51,7 +49,7 @@ public class DepartmentAnalyticsService {
                 stream().
                 findFirst().
                 orElse(null);
-        return employee != null ? employeeMapper.toEmployeeResponseDTO(employee) : null;
+        return employee != null ? employeeMapper.toEmployeeResponseDto(employee) : null;
     }
 
     public Integer findEmployeeCountForDepartment(int id) {

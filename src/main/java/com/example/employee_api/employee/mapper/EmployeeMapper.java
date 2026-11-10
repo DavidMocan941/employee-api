@@ -21,7 +21,7 @@ public class EmployeeMapper {
     return employee;
   }
 
-  public EmployeeResponseDto toEmployeeResponseDTO(Employee employee) {
+  public EmployeeResponseDto toEmployeeResponseDto(Employee employee) {
     EmployeeResponseDto dto = new EmployeeResponseDto();
     dto.setId(employee.getId());
     dto.setName(employee.getName());

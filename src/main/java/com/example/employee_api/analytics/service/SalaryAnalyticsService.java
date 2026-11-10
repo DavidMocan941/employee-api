@@ -27,7 +27,7 @@ public class SalaryAnalyticsService {
         List<Employee> employees = employeeRepository.getEmployeeWithSalaryIncreaseThisYear();
         return !employees.isEmpty() ? employees.
                 stream().
-                map(employee -> employeeMapper.toEmployeeResponseDTO(employee)).
+                map(employee -> employeeMapper.toEmployeeResponseDto(employee)).
                 toList() : Collections.emptyList();
     }
 
@@ -35,7 +35,7 @@ public class SalaryAnalyticsService {
         List<Employee> employees = employeeRepository.getEmployeeWithSalaryDecrease();
         return !employees.isEmpty() ? employees.
                 stream().
-                map(employee -> employeeMapper.toEmployeeResponseDTO(employee)).
+                map(employee -> employeeMapper.toEmployeeResponseDto(employee)).
                 toList() : Collections.emptyList();
     }
 
